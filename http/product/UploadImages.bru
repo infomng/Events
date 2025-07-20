@@ -1,0 +1,16 @@
+meta {
+  name: UploadImages
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{host}}/products/2/images
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  files: @file(/Users/gedeon_mac/Downloads/1erer guerre partie  1/chat.png)
+  files: @file(/Users/gedeon_mac/Downloads/1erer guerre partie  1/ChatGPT Image 17 mai 2025, 21_49_56.png)
+}

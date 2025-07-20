@@ -1,0 +1,18 @@
+meta {
+  name: GetMarkets
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host}}/markets?page=1&size=10&sort=id&direction=desc
+  body: none
+  auth: inherit
+}
+
+params:query {
+  page: 1
+  size: 10
+  sort: id
+  direction: desc
+}
