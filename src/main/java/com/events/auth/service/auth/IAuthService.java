@@ -1,13 +1,12 @@
 package com.events.auth.service.auth;
 
+import com.events.auth.dto.AccessToken;
 import com.events.auth.dto.LoginRequest;
-import com.events.auth.dto.LoginResponse;
-import com.events.auth.dto.RegisterRequest;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import com.events.auth.dto.CreateUserCommand;
 
 public interface IAuthService {
-    LoginResponse login(LoginRequest request);
-    String register(RegisterRequest request);
+    AccessToken login(LoginRequest request);
+    String register(CreateUserCommand request);
 
     String verifyEmail(String token);
 }

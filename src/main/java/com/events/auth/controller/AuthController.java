@@ -1,23 +1,22 @@
 package com.events.auth.controller;
 
+import com.events.auth.dto.AccessToken;
 import com.events.auth.dto.LoginRequest;
 import com.events.auth.dto.LoginResponse;
-import com.events.auth.dto.RegisterRequest;
+import com.events.auth.dto.CreateUserCommand;
 import com.events.auth.refreshtoken.Entity.RefreshToken;
 import com.events.auth.refreshtoken.service.RefreshTokenService;
 import com.events.auth.service.auth.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.web.authentication.AuthenticationConverter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationConverter;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -29,15 +28,22 @@ import java.util.Arrays;
 public class AuthController {
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
+    private final AuthenticationConverter authenticationConverter = new BasicAuthenticationConverter();
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request){
+    public ResponseEntity<String> register(@RequestBody CreateUserCommand request){
         return ResponseEntity.ok(authService.register(request));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(request.email());
+    public ResponseEntity<AccessToken> login(HttpServletRequest request) {
+        final var token = authenticationConverter.convert(request);
+        final var accessToken = authService.login(new LoginRequest(
+                token.getName(),
+                token.getCredentials().toString()
+        ));
+
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(token.getName());
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken.getToken())
                 .httpOnly(true)
@@ -47,9 +53,9 @@ public class AuthController {
                 .sameSite("Strict")
                 .build();
 
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-
-        return ResponseEntity.ok(authService.login(request));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(accessToken);
     }
 
     @PostMapping("refresh-token")
@@ -65,8 +71,8 @@ public class AuthController {
         return  ResponseEntity.ok(refreshTokenService.getAccessToken(refreshToken));
     }
 
-    @PostMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestBody String token) {
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         return ResponseEntity.ok(authService.verifyEmail(token));
     }
 }

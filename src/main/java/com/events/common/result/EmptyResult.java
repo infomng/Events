@@ -4,8 +4,8 @@ import jakarta.annotation.Nullable;
 import org.springframework.http.ProblemDetail;
 
 public class EmptyResult {
-    private boolean isSuccess;
-    private ProblemDetail error;
+    public boolean isSuccess;
+    public ProblemDetail error;
 
     public EmptyResult(boolean isSuccess, @Nullable ProblemDetail error) {
         if (isSuccess && error != null) {

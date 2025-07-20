@@ -55,7 +55,6 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final IUserRepository userRepository;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
