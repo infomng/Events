@@ -5,7 +5,7 @@ import com.events.auth.exception.InvalidRefreshTokenEXception;
 import com.events.auth.exception.UserNotFoundException;
 import com.events.auth.refreshtoken.Entity.RefreshToken;
 import com.events.auth.refreshtoken.repository.RefreshTokenRepository;
-import com.events.auth.service.jwt.JwtService;
+import com.events.auth.service.jwt.impl.JwtService;
 import com.events.user.entity.User;
 import com.events.user.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;

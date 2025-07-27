@@ -1,11 +1,9 @@
 package com.events.auth.config;
 
-import com.events.auth.service.auth.IAuthService;
-import com.events.auth.service.jwt.JwtAuthenticationFilter;
-import com.events.auth.service.jwt.JwtService;
+import com.events.auth.service.jwt.impl.JwtAuthenticationFilter;
+import com.events.auth.service.jwt.impl.JwtService;
 import com.events.auth.service.oauth.CustomOAuth2UserService;
 import com.events.user.entity.role.Role;
-import com.events.user.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Bean;

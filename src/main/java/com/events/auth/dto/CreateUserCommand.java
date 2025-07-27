@@ -1,5 +1,6 @@
 package com.events.auth.dto;
 
+import com.events.auth.enumeration.RoleEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -16,5 +17,6 @@ public record CreateUserCommand(String fullName,
                                         message = "Le mot de passe doit contenir au moins 12 caractères, une majuscule, une minuscule, un chiffre et un symbole."
                                 )
                                 String password,
-                                String verificationToken) {
+                                String verificationToken,
+                                RoleEnum role) {
 }

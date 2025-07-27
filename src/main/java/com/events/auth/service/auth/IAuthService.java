@@ -9,4 +9,6 @@ public interface IAuthService {
     String register(CreateUserCommand request);
 
     String verifyEmail(String token);
+
+    String resendVerificationEmail(String email);
 }

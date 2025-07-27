@@ -1,5 +1,6 @@
-package com.events.auth.service.jwt;
+package com.events.auth.service.jwt.impl;
 
+import com.events.auth.service.jwt.IJwtService;
 import com.events.user.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -14,7 +15,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-public class JwtService {
+public class JwtService implements IJwtService {
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -27,7 +28,6 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    // Générer un token JWT
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("fullName", user.getFullName());

@@ -6,7 +6,7 @@ import org.springframework.http.ProblemDetail;
 public class Result<T> {
     public boolean isSuccess;
     public ProblemDetail error;
-    private T data = null;
+    private final T value;
 
     public Result(boolean isSuccess, @Nullable ProblemDetail error, @Nullable T data) {
 
@@ -20,7 +20,7 @@ public class Result<T> {
 
         this.isSuccess = isSuccess;
         this.error = error;
-        this.data = data;
+        this.value = data;
     }
 
     public static <T> Result<T> success(T data) {
@@ -37,7 +37,7 @@ public class Result<T> {
     }
 
     @Nullable
-    public T getData() {
-        return data;
+    public T getValue() {
+        return value;
     }
 }

@@ -7,10 +7,10 @@ import com.events.auth.dto.CreateUserCommand;
 import com.events.auth.refreshtoken.Entity.RefreshToken;
 import com.events.auth.refreshtoken.service.RefreshTokenService;
 import com.events.auth.service.auth.AuthService;
+import com.events.common.result.Result;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AccessToken> login(HttpServletRequest request) {
+    public ResponseEntity<Result<AccessToken>> login(HttpServletRequest request) {
         final var token = authenticationConverter.convert(request);
         final var accessToken = authService.login(new LoginRequest(
                 token.getName(),
@@ -55,7 +55,7 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(accessToken);
+                .body(Result.success(accessToken));
     }
 
     @PostMapping("refresh-token")
@@ -72,7 +72,12 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        return ResponseEntity.ok(authService.verifyEmail(token));
+    public ResponseEntity<Result<String>> verifyEmail(@RequestParam String token) {
+        return ResponseEntity.ok(Result.success(authService.verifyEmail(token)));
+    }
+
+    @PostMapping("/resend-verification-email")
+    public ResponseEntity<Result<String>> resendVerificationEmail(@RequestParam String email) {
+        return ResponseEntity.ok(Result.success(authService.resendVerificationEmail(email)));
     }
 }

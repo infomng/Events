@@ -1,5 +1,6 @@
 package com.events.auth.service.user;
 
+import com.events.auth.exception.UserNotVerifiedException;
 import com.events.user.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +22,15 @@ public class UserDetailsServiceImp implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         var user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
+
+        if(!user.isVerified()){
+            throw new UserNotVerifiedException("User with email " + email + " is not verified.");
+        }
+
         return new User(
                 user.getEmail(),
                 user.getPassword(),
-                user.isVerified(),
+                true,
                 true,
                 true,
                 true,
@@ -31,6 +38,6 @@ public class UserDetailsServiceImp implements UserDetailsService {
         }
 
     private Collection<? extends GrantedAuthority> getAuthorities(String role) {
-        return java.util.List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role));
     }
 }

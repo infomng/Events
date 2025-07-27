@@ -2,7 +2,6 @@ package com.events.common.exception;
 
 import com.events.common.result.EmptyResult;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.MalformedJwtException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -11,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -22,16 +22,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<EmptyResult> handleRuntime(RuntimeException ex) {
         ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        detail.setTitle("Erreur métier");
+        detail.setTitle(ex.getClass().getSimpleName());
         detail.setDetail(ex.getMessage());
         detail.setProperty("timestamp", Instant.now().toString());
+        detail.setProperty("stackTrace", ex.getStackTrace()[0].toString());
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(EmptyResult.failure(detail));
     }
 
-    @ExceptionHandler(org.springframework.web.reactive.function.client.WebClientResponseException.class)
+    @ExceptionHandler(WebClientResponseException.class)
     public ResponseEntity<EmptyResult> handleWebClientResponseException(org.springframework.web.reactive.function.client.WebClientResponseException ex) {
         ProblemDetail detail = ProblemDetail.forStatus(ex.getStatusCode());
         detail.setTitle("Erreur WebClient");

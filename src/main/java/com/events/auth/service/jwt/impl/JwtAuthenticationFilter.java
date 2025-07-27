@@ -1,7 +1,5 @@
-package com.events.auth.service.jwt;
+package com.events.auth.service.jwt.impl;
 
-import com.events.auth.service.auth.IAuthService;
-import com.events.auth.service.user.UserDetailsServiceImp;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
