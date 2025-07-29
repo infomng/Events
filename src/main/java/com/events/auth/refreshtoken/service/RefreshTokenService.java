@@ -1,19 +1,21 @@
 package com.events.auth.refreshtoken.service;
 
-import com.events.auth.dto.LoginResponse;
-import com.events.auth.exception.InvalidRefreshTokenEXception;
+import com.events.auth.dto.AccessToken;
+import com.events.auth.exception.InvalidRefreshTokenException;
 import com.events.auth.exception.UserNotFoundException;
 import com.events.auth.refreshtoken.Entity.RefreshToken;
 import com.events.auth.refreshtoken.repository.RefreshTokenRepository;
 import com.events.auth.service.jwt.impl.JwtService;
 import com.events.user.entity.User;
 import com.events.user.repository.IUserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.UUID;
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class RefreshTokenService {
         RefreshToken token = RefreshToken.builder()
                 .expirationDate(Instant.now().plusMillis(refreshTokenDurationMs))
                 .user(user)
-                .token(UUID.randomUUID().toString())
+                .token(jwtService.generateToken(user))
                 .build();
 
         this.refreshTokenRepository.save(token);
@@ -39,21 +41,31 @@ public class RefreshTokenService {
         return token;
     }
 
-    public LoginResponse getAccessToken( String refreshToken ) {
+    public AccessToken getAccessToken(HttpServletRequest request ) {
+        Cookie[] cookies = request.getCookies();
+       if (cookies == null) {
+           throw new InvalidRefreshTokenException();
+       }
+
+        String refreshToken = Arrays.stream(cookies)
+                .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse(null);
 
         RefreshToken token = verifyRefreshToken(refreshToken);
 
         User user = token.getUser();
-        return new LoginResponse( jwtService.generateToken(user));
+        return new AccessToken( jwtService.generateToken(user));
     }
 
     public RefreshToken verifyRefreshToken(String token) {
         RefreshToken refreshToken = this.refreshTokenRepository.findByToken(token)
-                .orElseThrow(InvalidRefreshTokenEXception::new);
+                .orElseThrow(InvalidRefreshTokenException::new);
 
         if(refreshToken.isExpired()){
             refreshTokenRepository.deleteById(refreshToken.getId());
-            throw new InvalidRefreshTokenEXception();
+            throw new InvalidRefreshTokenException();
         }
         return refreshToken;
     }

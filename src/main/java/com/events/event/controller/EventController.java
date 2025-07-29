@@ -1,9 +1,14 @@
 package com.events.event.controller;
 
 
+import com.events.common.result.Result;
+import com.events.event.dto.CreateEventCommand;
 import com.events.event.dto.EventDto;
-import com.events.event.service.EventService;
+import com.events.event.dto.UpdateEventCommand;
+import com.events.event.service.IEventService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,11 +18,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventController {
 
-    private final EventService service;
+    private final IEventService service;
 
-    @PostMapping("/{organizerId}")
-    public EventDto create(@RequestBody EventDto dto, @PathVariable Long organizerId) {
-        return service.createEvent(dto, organizerId);
+    @PostMapping()
+    public ResponseEntity<Result<Long>> create(@Valid @RequestBody CreateEventCommand command) {
+        return ResponseEntity.ok(Result.success(service.createEvent(command)));
     }
 
     @GetMapping
@@ -37,5 +42,11 @@ public class EventController {
             @RequestParam(defaultValue = "5000") Double radius // 5 km par défaut
     ) {
         return service.getEventsNearby(lat, lon, radius);
+    }
+
+    @GetMapping("/{id}/update")
+    public ResponseEntity<Result<Void>> updateEvent(@PathVariable Long id,@Valid @RequestBody UpdateEventCommand command) {
+        service.updateEvent(id, command);
+        return ResponseEntity.ok(Result.success());
     }
 }

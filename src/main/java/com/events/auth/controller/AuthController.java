@@ -2,7 +2,6 @@ package com.events.auth.controller;
 
 import com.events.auth.dto.AccessToken;
 import com.events.auth.dto.LoginRequest;
-import com.events.auth.dto.LoginResponse;
 import com.events.auth.dto.CreateUserCommand;
 import com.events.auth.dto.ForgotPasswordRequest;
 import com.events.auth.dto.ResetPasswordRequest;
@@ -10,7 +9,6 @@ import com.events.auth.refreshtoken.Entity.RefreshToken;
 import com.events.auth.refreshtoken.service.RefreshTokenService;
 import com.events.auth.service.auth.IAuthService;
 import com.events.common.result.Result;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -21,7 +19,6 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationCo
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
-import java.util.Arrays;
 
 
 @RestController
@@ -33,8 +30,8 @@ public class AuthController {
     private final AuthenticationConverter authenticationConverter = new BasicAuthenticationConverter();
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody CreateUserCommand request){
-        return ResponseEntity.ok(authService.register(request));
+    public ResponseEntity<Result<String>> register(@RequestBody CreateUserCommand request){
+        return ResponseEntity.ok(Result.success(authService.register(request)));
     }
 
     @PostMapping("/login")
@@ -61,16 +58,8 @@ public class AuthController {
     }
 
     @PostMapping("refresh-token")
-    public ResponseEntity<LoginResponse> refresh(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) return ResponseEntity.status(401).build();
-
-        String refreshToken = Arrays.stream(cookies)
-                .filter(cookie -> "refreshToken".equals(cookie.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null);
-        return  ResponseEntity.ok(refreshTokenService.getAccessToken(refreshToken));
+    public ResponseEntity<AccessToken> refresh(HttpServletRequest request) {
+        return  ResponseEntity.ok(refreshTokenService.getAccessToken(request));
     }
 
     @GetMapping("/verify-email")

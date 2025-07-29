@@ -5,6 +5,7 @@ import com.events.auth.dto.LoginRequest;
 import com.events.auth.dto.CreateUserCommand;
 import com.events.auth.dto.ForgotPasswordRequest;
 import com.events.auth.dto.ResetPasswordRequest;
+import com.events.user.entity.User;
 
 public interface IAuthService {
     AccessToken login(LoginRequest request);
@@ -18,4 +19,6 @@ public interface IAuthService {
     String forgotPassword(ForgotPasswordRequest request);
 
     String resetPassword(ResetPasswordRequest request);
+
+    User getCurrentUser();
 }

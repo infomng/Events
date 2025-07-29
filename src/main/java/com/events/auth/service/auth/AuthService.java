@@ -7,6 +7,7 @@ import com.events.auth.dto.ForgotPasswordRequest;
 import com.events.auth.dto.ResetPasswordRequest;
 import com.events.auth.enumeration.RoleEnum;
 import com.events.auth.exception.EmailAlreadyExistException;
+import com.events.auth.exception.RegisterException;
 import com.events.auth.exception.UserNotFoundException;
 import com.events.auth.service.email.IEmailService;
 import com.events.auth.service.jwt.IJwtService;
@@ -17,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(propagation = Propagation.REQUIRED)
 public class AuthService implements IAuthService {
+    public static final String PLEASE_CHECK_YOUR_INBOX = ". Please check your inbox.";
     private final PasswordEncoder passwordEncoder;
     private final IJwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -56,9 +60,9 @@ public class AuthService implements IAuthService {
 
             emailService.sendVerificationEmail(request.email(), token);
 
-            return "Verification email sent to " + request.email() + ". Please check your inbox.";
+            return "Verification email sent to " + request.email() + PLEASE_CHECK_YOUR_INBOX;
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RegisterException(e.getMessage(), e.getCause());
         }
     }
 
@@ -102,7 +106,7 @@ public class AuthService implements IAuthService {
 
         emailService.sendVerificationEmail(email, token);
 
-        return "Verification email resent to " + email + ". Please check your inbox.";
+        return "Verification email resent to " + email + PLEASE_CHECK_YOUR_INBOX;
     }
 
     public AccessToken login(LoginRequest request) {
@@ -126,7 +130,7 @@ public class AuthService implements IAuthService {
         String token = jwtService.generateToken(user.getEmail());
         user.setResetPasswordToken(token);
         emailService.sendResetPasswordEmail(user.getEmail(), token);
-        return "Password reset email sent to " + user.getEmail() + ". Please check your inbox.";
+        return "Password reset email sent to " + user.getEmail() + PLEASE_CHECK_YOUR_INBOX;
     }
 
     @Override
@@ -141,5 +145,18 @@ public class AuthService implements IAuthService {
         user.setResetPasswordToken(null);
 
         return "Password has been reset successfully for " + user.getEmail();
+    }
+
+    @Override
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+            throw new UserNotFoundException("Utilisateur non authentifié");
+        }
+
+        String email = authentication.getName();
+
+        return userService.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 }
