@@ -4,9 +4,11 @@ import com.events.auth.dto.AccessToken;
 import com.events.auth.dto.LoginRequest;
 import com.events.auth.dto.LoginResponse;
 import com.events.auth.dto.CreateUserCommand;
+import com.events.auth.dto.ForgotPasswordRequest;
+import com.events.auth.dto.ResetPasswordRequest;
 import com.events.auth.refreshtoken.Entity.RefreshToken;
 import com.events.auth.refreshtoken.service.RefreshTokenService;
-import com.events.auth.service.auth.AuthService;
+import com.events.auth.service.auth.IAuthService;
 import com.events.common.result.Result;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +28,7 @@ import java.util.Arrays;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final AuthService authService;
+    private final IAuthService authService;
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationConverter authenticationConverter = new BasicAuthenticationConverter();
 
@@ -79,5 +81,15 @@ public class AuthController {
     @PostMapping("/resend-verification-email")
     public ResponseEntity<Result<String>> resendVerificationEmail(@RequestParam String email) {
         return ResponseEntity.ok(Result.success(authService.resendVerificationEmail(email)));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Result<String>> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(Result.success(authService.forgotPassword(request)));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Result<String>> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(Result.success(authService.resetPassword(request)));
     }
 }

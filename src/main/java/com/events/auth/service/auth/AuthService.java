@@ -3,6 +3,8 @@ package com.events.auth.service.auth;
 import com.events.auth.dto.AccessToken;
 import com.events.auth.dto.LoginRequest;
 import com.events.auth.dto.CreateUserCommand;
+import com.events.auth.dto.ForgotPasswordRequest;
+import com.events.auth.dto.ResetPasswordRequest;
 import com.events.auth.enumeration.RoleEnum;
 import com.events.auth.exception.EmailAlreadyExistException;
 import com.events.auth.exception.UserNotFoundException;
@@ -114,5 +116,30 @@ public class AuthService implements IAuthService {
         String jwt = jwtService.generateToken(user);
 
         return AccessToken.builder().access_token(jwt).build();
+    }
+
+    @Override
+    public String forgotPassword(ForgotPasswordRequest request) {
+        User user = userService.findByEmail(request.email())
+                .orElseThrow(() -> new UserNotFoundException(request.email()));
+
+        String token = jwtService.generateToken(user.getEmail());
+        user.setResetPasswordToken(token);
+        emailService.sendResetPasswordEmail(user.getEmail(), token);
+        return "Password reset email sent to " + user.getEmail() + ". Please check your inbox.";
+    }
+
+    @Override
+    public String resetPassword(ResetPasswordRequest request) {
+        String email = jwtService.extractUsername(request.token());
+        User user = userService.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+        if(user.getResetPasswordToken() == null || !user.getResetPasswordToken().equals(request.token())) {
+            throw new IllegalArgumentException("Invalid or expired token");
+        }
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        user.setResetPasswordToken(null);
+
+        return "Password has been reset successfully for " + user.getEmail();
     }
 }

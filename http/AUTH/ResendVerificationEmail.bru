@@ -5,7 +5,11 @@ meta {
 }
 
 post {
-  url: {{host}}/resend-verification-email
+  url: {{host}}/auth/resend-verification-email?email=infomng2022@gmail.com
   body: none
-  auth: inherit
+  auth: none
+}
+
+params:query {
+  email: infomng2022@gmail.com
 }

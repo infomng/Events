@@ -20,6 +20,7 @@ public class User {
     private String email;
     private String password;
     private String verificationToken;
+    private String resetPasswordToken;
     @Column(name = "is_verified", nullable = false, columnDefinition = "boolean default false")
     private boolean isVerified = false;
 

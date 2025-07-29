@@ -8,6 +8,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import static org.hibernate.sql.ast.SqlTreeCreationLogger.LOGGER;
+
 @Service
 @RequiredArgsConstructor
 public class EmailService implements IEmailService {
@@ -21,6 +23,14 @@ public class EmailService implements IEmailService {
         String path = "/api/v1/auth/verify-email";
         String message = "Click the button below to verify your email address:";
         sendEmail(email, verificationToken, subject, path, message);
+    }
+
+    @Override
+    public void sendResetPasswordEmail(String email, String token) {
+        String subject = "Password Reset Request";
+        String path = "/api/v1/auth/reset-password";
+        String message = "Click the button below to reset your password:";
+        sendEmail(email, token, subject, path, message);
     }
 
     private void sendEmail(String email, String token, String subject, String path, String message) {
@@ -51,7 +61,7 @@ public class EmailService implements IEmailService {
             mailSender.send(mimeMessage);
 
         } catch (Exception e) {
-            System.err.println("Failed to send email: " + e.getMessage());
+            LOGGER.error("Failed to send email: {}", e.getMessage(), e);
         }
     }
 }
