@@ -16,7 +16,7 @@ auth:basic {
 }
 
 script:post-response {
-  if(res.body.access_token) {
-    bru.setVar('access_token_set_by_collection_script', res.body.access_token);
+  if(res.body.value.access_token) {
+    bru.setVar('access_token_set_by_collection_script', res.body.value.access_token);
      }
 }

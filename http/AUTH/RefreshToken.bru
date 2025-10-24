@@ -5,9 +5,13 @@ meta {
 }
 
 post {
-  url: {{host}}/auth/refresh-token
+  url: {{host}}/auth/refresh-token?reFreshToken
   body: none
   auth: none
+}
+
+params:query {
+  reFreshToken: 
 }
 
 headers {
