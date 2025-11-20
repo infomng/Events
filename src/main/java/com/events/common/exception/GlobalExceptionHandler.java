@@ -1,7 +1,8 @@
 package com.events.common.exception;
 
 import com.events.common.result.EmptyResult;
-import io.jsonwebtoken.JwtException;
+import com.events.common.result.Result;
+import com.events.common.utils.contants.Constants;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -19,25 +20,25 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<EmptyResult> handleRuntime(RuntimeException ex) {
+    public ResponseEntity<Result<ProblemDetail>> handleRuntime(RuntimeException ex) {
         ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         detail.setTitle(ex.getClass().getSimpleName());
         detail.setDetail(ex.getMessage());
-        detail.setProperty("timestamp", Instant.now().toString());
-        detail.setProperty("stackTrace", ex.getStackTrace()[0].toString());
+        detail.setProperty(Constants.TIMESTAMP, Instant.now().toString());
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(EmptyResult.failure(detail));
+                .body(Result.failure(detail));
     }
 
     @ExceptionHandler(WebClientResponseException.class)
     public ResponseEntity<EmptyResult> handleWebClientResponseException(org.springframework.web.reactive.function.client.WebClientResponseException ex) {
         ProblemDetail detail = ProblemDetail.forStatus(ex.getStatusCode());
         detail.setTitle("Erreur WebClient");
-        detail.setDetail(ex.getMessage() + " " + ex.getResponseBodyAsString());
-        detail.setProperty("timestamp", Instant.now().toString());
+        detail.setDetail(ex.getMessage() + Constants.EMPTY_STRING + ex.getResponseBodyAsString());
+        detail.setProperty(Constants.TIMESTAMP, Instant.now().toString());
         return ResponseEntity
                 .status(ex.getStatusCode())
                 .body(EmptyResult.failure(detail));
@@ -48,26 +49,9 @@ public class GlobalExceptionHandler {
         ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         detail.setTitle("Erreur interne du serveur");
         detail.setDetail(ex.getMessage());
-        detail.setProperty("timestamp", Instant.now().toString());
+        detail.setProperty(Constants.TIMESTAMP, Instant.now().toString());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(EmptyResult.failure(detail));
-    }
-
-  /* @ExceptionHandler(io.jsonwebtoken.ExpiredJwtException.class)
-   public ResponseEntity<String> handleExpiredJwtException(io.jsonwebtoken.ExpiredJwtException ex) {
-       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-               .body("Le jeton JWT a expiré. Veuillez vous reconnecter.");
-   }*/
-
-    @ExceptionHandler(JwtException.class)
-    public ResponseEntity<EmptyResult> handleJwtException(JwtException ex) {
-        ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
-        detail.setTitle("Erreur JWT");
-        detail.setDetail(ex.getMessage());
-        detail.setProperty("timestamp", Instant.now().toString());
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
                 .body(EmptyResult.failure(detail));
     }
 
@@ -83,7 +67,7 @@ public class GlobalExceptionHandler {
 
         detail.setDetail("Les données fournies sont invalides.");
         detail.setProperty("errors", errors);
-        detail.setProperty("timestamp", Instant.now().toString());
+        detail.setProperty(Constants.TIMESTAMP, Instant.now().toString());
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -95,7 +79,7 @@ public class GlobalExceptionHandler {
         ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         detail.setTitle("Utilisateur introuvable");
         detail.setDetail(ex.getMessage());
-        detail.setProperty("timestamp", Instant.now().toString());
+        detail.setProperty(Constants.TIMESTAMP, Instant.now().toString());
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(EmptyResult.failure(detail));
@@ -106,7 +90,7 @@ public class GlobalExceptionHandler {
         ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         detail.setTitle("Validation échouée");
         detail.setDetail("Certaines contraintes de validation ont échoué.");
-        detail.setProperty("timestamp", Instant.now().toString());
+        detail.setProperty(Constants.TIMESTAMP, Instant.now().toString());
 
         Map<String, String> errors = new HashMap<>();
         ex.getConstraintViolations().forEach(cv -> {

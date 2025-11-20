@@ -1,24 +1,26 @@
 package com.events.modules.auth.service.auth;
 
-import com.events.modules.auth.dto.AccessToken;
-import com.events.modules.auth.dto.LoginRequest;
-import com.events.modules.auth.dto.RegisterCommand;
-import com.events.modules.auth.dto.ForgotPasswordRequest;
-import com.events.modules.auth.dto.ResetPasswordRequest;
+import com.events.modules.auth.dto.AccessTokenDto;
+import com.events.modules.auth.dto.LoginRequestDto;
+import com.events.modules.auth.dto.RegisterCommandDto;
+import com.events.modules.auth.dto.ForgotPasswordRequestDto;
+import com.events.modules.auth.dto.ResetPasswordRequestDto;
+import com.events.modules.user.dto.GetUserDto;
 import com.events.modules.user.entity.User;
 
 public interface IAuthService {
-    AccessToken login(LoginRequest request);
+    AccessTokenDto login(LoginRequestDto request);
 
-    String register(RegisterCommand request);
+    String register(RegisterCommandDto request);
 
     String verifyEmail(String token);
 
     String resendVerificationEmail(String email);
 
-    String forgotPassword(ForgotPasswordRequest request);
+    String forgotPassword(ForgotPasswordRequestDto request);
 
-    String resetPassword(ResetPasswordRequest request);
+    String resetPassword(ResetPasswordRequestDto request);
 
     User getCurrentUser();
+    GetUserDto getCurrentUserDto();
 }

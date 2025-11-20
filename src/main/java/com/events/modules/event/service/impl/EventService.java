@@ -2,14 +2,14 @@ package com.events.modules.event.service.impl;
 
 import com.events.modules.auth.service.auth.IAuthService;
 import com.events.common.exception.BadRequestException;
-import com.events.modules.event.dto.CreateEventCommand;
+import com.events.modules.event.dto.CreateEventCommandDto;
 import com.events.modules.event.dto.EventDto;
-import com.events.modules.event.dto.UpdateEventCommand;
+import com.events.modules.event.dto.UpdateEventCommandDto;
 import com.events.modules.event.entity.Event;
 import com.events.modules.event.enumeration.EventStatusEnum;
 import com.events.modules.event.exception.EventForbidenException;
 import com.events.modules.event.exception.EventNotFoundException;
-import com.events.modules.event.mapper.IEventMapper;
+import com.events.modules.event.dto.mapper.IEventMapper;
 import com.events.modules.event.repository.IEventRepository;
 import com.events.modules.event.service.IEventService;
 import com.events.modules.user.entity.User;
@@ -30,7 +30,7 @@ public class EventService implements IEventService {
     private final IEventMapper eventMapper;
 
     @Override
-    public Long createEvent(CreateEventCommand command) {
+    public Long createEvent(CreateEventCommandDto command) {
         if (command.startDate().isAfter(command.endDate())) {
             throw new BadRequestException("Start date cannot be after end date");
         }
@@ -96,7 +96,7 @@ public class EventService implements IEventService {
     }
 
     @Override
-    public void updateEvent(Long id,UpdateEventCommand command) {
+    public void updateEvent(Long id, UpdateEventCommandDto command) {
         User currentUser = authService.getCurrentUser();
 
         Event event = eventRepository.findById(id)
@@ -115,7 +115,7 @@ public class EventService implements IEventService {
         return eventMapper.toDtoList(events);
     }
 
-    private static void updateEvent(UpdateEventCommand command, Event event) {
+    private static void updateEvent(UpdateEventCommandDto command, Event event) {
         if(command.totalTickets() < event.getAvailableTickets()) {
             throw new BadRequestException("Total tickets cannot be less than available tickets");
         }

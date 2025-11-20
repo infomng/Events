@@ -2,9 +2,9 @@ package com.events.modules.event.controller;
 
 
 import com.events.common.result.Result;
-import com.events.modules.event.dto.CreateEventCommand;
+import com.events.modules.event.dto.CreateEventCommandDto;
 import com.events.modules.event.dto.EventDto;
-import com.events.modules.event.dto.UpdateEventCommand;
+import com.events.modules.event.dto.UpdateEventCommandDto;
 import com.events.modules.event.service.IEventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class EventController {
     private final IEventService service;
 
     @PostMapping()
-    public ResponseEntity<Result<Long>> create(@Valid @RequestBody CreateEventCommand command) {
+    public ResponseEntity<Result<Long>> create(@Valid @RequestBody CreateEventCommandDto command) {
         return ResponseEntity.ok(Result.success(service.createEvent(command)));
     }
 
@@ -45,7 +45,7 @@ public class EventController {
     }
 
     @GetMapping("/{id}/update")
-    public ResponseEntity<Result<Void>> updateEvent(@PathVariable Long id,@Valid @RequestBody UpdateEventCommand command) {
+    public ResponseEntity<Result<Void>> updateEvent(@PathVariable Long id,@Valid @RequestBody UpdateEventCommandDto command) {
         service.updateEvent(id, command);
         return ResponseEntity.ok(Result.success());
     }

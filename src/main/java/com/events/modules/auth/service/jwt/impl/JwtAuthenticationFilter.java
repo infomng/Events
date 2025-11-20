@@ -1,6 +1,6 @@
 package com.events.modules.auth.service.jwt.impl;
 
-import com.events.common.utils.contants.NameOf;
+import com.events.common.utils.contants.Constants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,11 +32,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader(NameOf.AUTHORIZATION);
+        final String authHeader = request.getHeader(Constants.AUTHORIZATION);
         final String jwt;
         final String userEmail;
 
-        if (authHeader == null || !authHeader.startsWith(NameOf.BEARER)) {
+        if (authHeader == null || !authHeader.startsWith(Constants.BEARER)) {
             filterChain.doFilter(request, response);
             return;
         }

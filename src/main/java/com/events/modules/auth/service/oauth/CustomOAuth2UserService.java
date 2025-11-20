@@ -1,7 +1,7 @@
 package com.events.modules.auth.service.oauth;
 
-import com.events.modules.auth.dto.RegisterCommand;
-import com.events.modules.user.entity.User;
+import com.events.common.utils.contants.Constants;
+import com.events.modules.auth.dto.RegisterCommandDto;
 import com.events.modules.user.enumeration.RoleEnum;
 import com.events.modules.user.service.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -28,18 +27,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuth2User oAuth2User = new DefaultOAuth2UserService().loadUser(request);
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        String email = (String) attributes.get("email");
-        String name = (String) attributes.get("name");
+        String email = (String) attributes.get(Constants.EMAIL);
+        String name = (String) attributes.get(Constants.NAME);
 
-        Optional<User> exi  = userService.findByEmail(email);
+        if(!userService.existsByEmail(email)) {
 
-        if(exi.isEmpty()) {
-            String emptyString = "";
-
-            RegisterCommand command = RegisterCommand.builder()
+            RegisterCommandDto command = RegisterCommandDto.builder()
                     .fullName(name)
                     .email(email)
-                    .password(emptyString)
+                    .password(Constants.EMPTY_STRING)
                     .role(RoleEnum.USER)
                     .build();
 

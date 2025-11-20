@@ -5,7 +5,6 @@ import com.events.modules.event.entity.Event;
 import com.events.modules.user.enumeration.RoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,7 +24,7 @@ public class User extends AuditableEntity {
     private String resetPasswordToken;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean isVerified;
+    private boolean isVerified = false;
 
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean isEnabled = true;

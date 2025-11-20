@@ -16,7 +16,10 @@ public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Column(columnDefinition = "TEXT")
     private String token;
+
     private Instant expirationDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

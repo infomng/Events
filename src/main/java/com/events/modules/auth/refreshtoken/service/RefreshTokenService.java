@@ -1,54 +1,59 @@
 package com.events.modules.auth.refreshtoken.service;
 
-import com.events.modules.auth.dto.AccessToken;
+import com.events.common.config.properties.JwtProperties;
+import com.events.common.utils.contants.Constants;
+import com.events.modules.auth.dto.AccessTokenDto;
 import com.events.modules.auth.exception.InvalidRefreshTokenException;
-import com.events.modules.auth.exception.UserNotFoundException;
 import com.events.modules.auth.refreshtoken.Entity.RefreshToken;
-import com.events.modules.auth.refreshtoken.repository.RefreshTokenRepository;
-import com.events.modules.auth.service.jwt.impl.JwtService;
+import com.events.modules.auth.refreshtoken.dto.RefreshTokenResponseDto;
+import com.events.modules.auth.refreshtoken.dto.mapper.RefreshTokenMapper;
+import com.events.modules.auth.refreshtoken.repository.IRefreshTokenRepository;
+import com.events.modules.auth.service.jwt.IJwtService;
 import com.events.modules.user.entity.User;
-import com.events.modules.user.repository.IUserRepository;
+import com.events.modules.user.service.IUserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Arrays;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
-public class RefreshTokenService {
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final IUserRepository userRepository;
-    private final JwtService jwtService;
+public class RefreshTokenService implements IRefreshTokenService {
 
-    @Value("${app.security.refresh-token.expiration}") // Ex: 7 jours
-    private Long refreshTokenDurationMs;
+    private final IRefreshTokenRepository refreshTokenRepository;
+    private final IUserService userService;
+    private final IJwtService jwtService;
+    private final JwtProperties jwtProperties;
 
-    public RefreshToken createRefreshToken(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+    @Override
+    public RefreshTokenResponseDto createRefreshToken(String email) {
+        User user = userService.findByEmail(email);
 
         RefreshToken token = RefreshToken.builder()
-                .expirationDate(Instant.now().plusMillis(refreshTokenDurationMs))
+                .expirationDate(Instant.now().plusMillis(jwtProperties.refreshToken().duration()))
                 .user(user)
-                .token(jwtService.generateToken(user))
+                .token(jwtService.generateRefreshToken(user))
                 .build();
 
-        this.refreshTokenRepository.save(token);
+        RefreshToken savedToken = this.refreshTokenRepository.save(token);
 
-        return token;
+        return RefreshTokenMapper.toRefreshTokenResponseDto(savedToken);
     }
 
-    public AccessToken getAccessToken(HttpServletRequest request ) {
+    @Override
+    public AccessTokenDto getAccessToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
        if (cookies == null) {
            throw new InvalidRefreshTokenException();
        }
 
         String refreshToken = Arrays.stream(cookies)
-                .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                .filter(cookie -> Constants.REFRESH_TOKEN.equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElse(null);
@@ -56,10 +61,10 @@ public class RefreshTokenService {
         RefreshToken token = verifyRefreshToken(refreshToken);
 
         User user = token.getUser();
-        return new AccessToken( jwtService.generateToken(user));
+        return new AccessTokenDto(jwtService.generateAccessToken(user));
     }
 
-    public RefreshToken verifyRefreshToken(String token) {
+    private RefreshToken verifyRefreshToken(String token) {
         RefreshToken refreshToken = this.refreshTokenRepository.findByToken(token)
                 .orElseThrow(InvalidRefreshTokenException::new);
 

@@ -1,17 +1,17 @@
 package com.events.modules.event.service;
 
-import com.events.modules.event.dto.CreateEventCommand;
+import com.events.modules.event.dto.CreateEventCommandDto;
 import com.events.modules.event.dto.EventDto;
-import com.events.modules.event.dto.UpdateEventCommand;
+import com.events.modules.event.dto.UpdateEventCommandDto;
 
 import java.util.List;
 
 public interface IEventService {
-    Long createEvent(CreateEventCommand command);
+    Long createEvent(CreateEventCommandDto command);
     List<EventDto> getAllEvents();
     EventDto getEventById(Long id);
     List<EventDto> getEventsNearby(Double lat, Double lon, Double radiusInMeters);
-    void updateEvent(Long id, UpdateEventCommand command);
+    void updateEvent(Long id, UpdateEventCommandDto command);
     List<EventDto> getAllIncomingEvents();
 //TODO:void deleteEvent(Long id);
 //TODO:List<EventDto> searchEvents(String keyword, String category, Double lat, Double lon, Double radiusInMeters);

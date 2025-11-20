@@ -32,7 +32,7 @@ public class Result<T> {
     }
 
 
-    public static Result<?> failure(ProblemDetail error) {
+    public static  <T> Result<T> failure(ProblemDetail error) {
         return new Result<>(false, error, null);
     }
 

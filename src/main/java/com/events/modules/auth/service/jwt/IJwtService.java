@@ -7,9 +7,11 @@ import java.util.function.Function;
 
 public interface IJwtService {
 
-  String generateToken(User user);
+    String generateAccessToken(User user);
 
-  String generateToken(String email);
+    String generateRefreshToken(User user);
+
+    String generateVerificationToken(String email);
 
   <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
 

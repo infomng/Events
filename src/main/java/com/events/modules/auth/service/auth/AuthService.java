@@ -1,16 +1,18 @@
 package com.events.modules.auth.service.auth;
 
-import com.events.common.utils.contants.NameOf;
-import com.events.modules.auth.dto.AccessToken;
-import com.events.modules.auth.dto.LoginRequest;
-import com.events.modules.auth.dto.RegisterCommand;
-import com.events.modules.auth.dto.ForgotPasswordRequest;
-import com.events.modules.auth.dto.ResetPasswordRequest;
+import com.events.common.utils.contants.Constants;
+import com.events.modules.auth.dto.AccessTokenDto;
+import com.events.modules.auth.dto.LoginRequestDto;
+import com.events.modules.auth.dto.RegisterCommandDto;
+import com.events.modules.auth.dto.ForgotPasswordRequestDto;
+import com.events.modules.auth.dto.ResetPasswordRequestDto;
+import com.events.modules.user.dto.GetUserDto;
+import com.events.modules.user.dto.mapper.IUserMapper;
 import com.events.modules.user.enumeration.RoleEnum;
 import com.events.modules.auth.exception.EmailAlreadyExistException;
 import com.events.modules.auth.exception.RegisterException;
 import com.events.modules.auth.exception.UserNotFoundException;
-import com.events.modules.auth.service.email.IEmailService;
+import com.events.modules.auth.service.mail.IMailService;
 import com.events.modules.auth.service.jwt.IJwtService;
 import com.events.common.exception.BadRequestException;
 import com.events.modules.user.entity.User;
@@ -32,23 +34,25 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(propagation = Propagation.REQUIRED)
 public class AuthService implements IAuthService {
+
     private final PasswordEncoder passwordEncoder;
     private final IJwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final IUserService userService;
-    private final IEmailService emailService;
+    private final IMailService emailService;
+    private final IUserMapper userMapper;
 
     @Override
-    public String register(RegisterCommand request) {
+    public String register(RegisterCommandDto request) {
 
         try {
             if (userService.existsByEmail(request.email())) {
                 throw new EmailAlreadyExistException(request.email());
             }
 
-            String token = jwtService.generateToken(request.email());
+            String token = jwtService.generateVerificationToken(request.email());
 
-            RegisterCommand command = RegisterCommand.builder()
+            RegisterCommandDto command = RegisterCommandDto.builder()
                     .email(request.email())
                     .password(passwordEncoder.encode(request.password()))
                     .fullName(request.fullName())
@@ -60,7 +64,7 @@ public class AuthService implements IAuthService {
 
             emailService.sendVerificationEmail(request.email(), token);
 
-            return NameOf.VERIFICATION_EMAIL_SENT_TO + request.email() + NameOf.PLEASE_CHECK_YOUR_INBOX;
+            return Constants.VERIFICATION_EMAIL_SENT_TO + request.email() + Constants.PLEASE_CHECK_YOUR_INBOX;
         } catch (Exception e) {
             throw new RegisterException(e.getMessage(), e.getCause());
         }
@@ -69,7 +73,7 @@ public class AuthService implements IAuthService {
     @Override
     public String verifyEmail(String token) {
         if(token == null || token.isEmpty()) {
-            throw new IllegalArgumentException("Token cannot be null or empty");
+            throw new BadRequestException(Constants.TOKEN_CANNOT_BE_NULL_OR_EMPTY);
         }
 
         String email = jwtService.extractUsername(token);
@@ -77,18 +81,18 @@ public class AuthService implements IAuthService {
         User user = userService.findByEmail(email) ;
 
         if(user.isVerified()){
-            throw  new BadRequestException("User already verified");
+            throw  new BadRequestException(Constants.USER_ALREADY_VERIFIED);
         }
 
         if(user.getVerificationToken() == null || !user.getVerificationToken().equals(token)) {
-            throw new IllegalArgumentException("Invalid verification token");
+            throw new IllegalArgumentException(Constants.INVALID_VERIFICATION_TOKEN);
         }
 
         user.setVerified(true);
         user.setVerificationToken(null);
 
 
-        return "User " + user.getFullName() + " with email " + user.getEmail() + " has been successfully verified.";
+        return Constants.USER_HAS_BEEN_SUCCESSFULLY_VERIFIED + user.getFullName() + Constants.EMPTY_STRING + user.getEmail();
     }
 
     @Override
@@ -96,61 +100,66 @@ public class AuthService implements IAuthService {
         User user = userService.findByEmail(email);
 
         if (user.isVerified()) {
-            throw new BadRequestException("User already verified");
+            throw new BadRequestException(Constants.USER_ALREADY_VERIFIED);
         }
 
-        String token = jwtService.generateToken(email);
+        String token = jwtService.generateVerificationToken(email);
         user.setVerificationToken(token);
 
         emailService.sendVerificationEmail(email, token);
 
-        return "Verification email resent to " + email + NameOf.PLEASE_CHECK_YOUR_INBOX;
+        return Constants.VERIFICATION_EMAIL_SENT_TO+ email + Constants.PLEASE_CHECK_YOUR_INBOX;
     }
 
-    public AccessToken login(LoginRequest request) {
+    public AccessTokenDto login(LoginRequestDto request) {
         authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
 
         User user = userService.findByEmail(request.email());
 
-        String jwt = jwtService.generateToken(user);
+        String jwt = jwtService.generateAccessToken(user);
 
-        return AccessToken.builder().access_token(jwt).build();
+        return AccessTokenDto.builder().access_token(jwt).build();
     }
 
     @Override
-    public String forgotPassword(ForgotPasswordRequest request) {
+    public String forgotPassword(ForgotPasswordRequestDto request) {
         User user = userService.findByEmail(request.email());
 
-        String token = jwtService.generateToken(user.getEmail());
+        String token = jwtService.generateVerificationToken(user.getEmail());
         user.setResetPasswordToken(token);
         emailService.sendResetPasswordEmail(user.getEmail(), token);
-        return "Password reset email sent to " + user.getEmail() + NameOf.PLEASE_CHECK_YOUR_INBOX;
+        return Constants.PASSWORD_RESET_EMAIL_SENT_TO + user.getEmail() + Constants.PLEASE_CHECK_YOUR_INBOX;
     }
 
     @Override
-    public String resetPassword(ResetPasswordRequest request) {
+    public String resetPassword(ResetPasswordRequestDto request) {
         String email = jwtService.extractUsername(request.token());
         User user = userService.findByEmail(email);
         if(user.getResetPasswordToken() == null || !user.getResetPasswordToken().equals(request.token())) {
-            throw new IllegalArgumentException("Invalid or expired token");
+            throw new IllegalArgumentException(Constants.INVALID_OR_EXPIRED_TOKEN);
         }
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         user.setResetPasswordToken(null);
 
-        return "Password has been reset successfully for " + user.getEmail();
+        return Constants.PASSWORD_HAS_BEEN_RESET_SUCCESSFULLY_FOR + user.getEmail();
     }
 
     @Override
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
-            throw new UserNotFoundException("Utilisateur non authentifié");
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals(Constants.ANONYMOUS_USER)) {
+            throw new UserNotFoundException(Constants.USER_NOT_AUTHENTICATED);
         }
 
         String email = authentication.getName();
 
         return userService.findByEmail(email);
+    }
+
+    @Override
+    public GetUserDto getCurrentUserDto() {
+        return userMapper.toGetUserDto(getCurrentUser());
     }
 }

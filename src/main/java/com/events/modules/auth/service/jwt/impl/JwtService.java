@@ -1,13 +1,16 @@
 package com.events.modules.auth.service.jwt.impl;
 
-import com.events.common.utils.contants.NameOf;
+import com.events.common.config.properties.JwtProperties;
+import com.events.common.utils.contants.Constants;
 import com.events.modules.auth.service.jwt.IJwtService;
 import com.events.modules.user.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -16,24 +19,28 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class JwtService implements IJwtService {
 
     @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.expiration}")
+    @Value("${jwt.duration}")
     private long jwtExpiration;
+
+    private final JwtProperties jwtProperties;
 
     // Clé secrète (convertie en clé HMAC)
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String generateToken(User user) {
+    private String generateToken(User user, Long jwtExpiration) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put(NameOf.FULL_NAME, user.getFullName());
-        claims.put(NameOf.ROLE, user.getRole().name());
-        claims.put(NameOf.EMAIL, user.getEmail());
+        claims.put(Constants.FULL_NAME, user.getFullName());
+        claims.put(Constants.ROLE, user.getRole().name());
+        claims.put(Constants.EMAIL, user.getEmail());
 
         return Jwts.builder()
                 .subject(user.getId().toString()) // équivalent de setSubject()
@@ -43,26 +50,36 @@ public class JwtService implements IJwtService {
                 .signWith(getSecretKey()) // sans algo ici
                 .compact();
 }
-    public String generateToken(String email) {
+
+    @Override
+    public String generateAccessToken(User user) {
+        return this.generateToken(user, jwtProperties.duration());
+    }
+
+    @Override
+    public String generateRefreshToken(User user) {
+        return this.generateToken(user, jwtProperties.refreshToken().duration());
+    }
+
+    public String generateVerificationToken(String email) {
         return Jwts.builder()
                 .subject(email)
-                .claim(NameOf.EMAIL, email)
+                .claim(Constants.EMAIL, email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSecretKey())
                 .compact();
     }
 
-
     // Extraire un claim spécifique (ex: username/email)
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
-    }
+ public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+         final Claims claims = extractAllClaims(token);
+         return claimsResolver.apply(claims);
+ }
 
     // Extraire l’email (subject)
     public String extractUsername(String token) {
-        return extractClaim(token, claims -> claims.get(NameOf.EMAIL, String.class));
+        return extractClaim(token, claims -> claims.get(Constants.EMAIL, String.class));
     }
 
     // Vérifier si un token est valide pour un utilisateur
