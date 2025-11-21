@@ -3,6 +3,9 @@ package com.events.common.utils.contants;
 public final class Constants {
 
     public static final String TOKEN = "token";
+    public static final String ACCESS_TOKEN = "access_token";
+    public static final String ROLES = "roles";
+    public static final Long REFRESH_TOKEN_MIN_DURATION = 604800000L;
 
     private Constants() {}
 
@@ -47,7 +50,7 @@ public final class Constants {
     // Test Constants
     public static final String JOHN_DOE = "John Doe";
     public static final String JOHN_DOE_EMAIL = "john.doe@example.com";
-    public static final String TEST_PASSWORD = "Mvxvxicavxvxcvcsavxvnoestuvxccasa123@#";
+    public static final String JOHN_DOE_PASSWORD = "Mvxvxicavxvxcvcsavxvnoestuvxccasa123@#";
     public static final String TEST_MESSAGE = "This is a test message.";
 
 }

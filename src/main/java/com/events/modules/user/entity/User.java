@@ -5,6 +5,8 @@ import com.events.modules.event.entity.Event;
 import com.events.modules.user.enumeration.RoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,9 +14,9 @@ import java.util.Set;
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor
+@SuperBuilder
 public class User extends AuditableEntity {
 
     private String fullName;

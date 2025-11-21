@@ -19,18 +19,18 @@ public class UserService implements IUserService {
 
     @Override
     public void createUser(RegisterCommandDto command) {
-        User user = new User();
-        user.setFullName(command.fullName());
-        user.setEmail(command.email());
-        user.setPassword(command.password());
-        user.setRole(command.role());
-        user.setVerificationToken(command.verificationToken());
-        user.setVerified(false);
-        user.setEnabled(true);
-        user.setAccountNonExpired(true);
-        user.setAccountNonLocked(true);
-        user.setCredentialsNonExpired(true);
-
+       User user = User.builder()
+           .fullName(command.fullName())
+           .email(command.email())
+           .password(command.password())
+           .role(command.role())
+           .verificationToken(command.verificationToken())
+           .isVerified(false)
+           .isEnabled(true)
+           .isAccountNonExpired(true)
+           .isAccountNonExpired(true)
+           .isCredentialsNonExpired(true)
+           .build();
         userRepository.save(user);
     }
 

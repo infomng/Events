@@ -1,6 +1,8 @@
 package com.events.modules.auth.service.auth;
 
+import com.events.common.exception.BusinessException;
 import com.events.common.utils.contants.Constants;
+import com.events.common.utils.string.StringUtils;
 import com.events.modules.auth.dto.AccessTokenDto;
 import com.events.modules.auth.dto.LoginRequestDto;
 import com.events.modules.auth.dto.RegisterCommandDto;
@@ -10,7 +12,6 @@ import com.events.modules.user.dto.GetUserDto;
 import com.events.modules.user.dto.mapper.IUserMapper;
 import com.events.modules.user.enumeration.RoleEnum;
 import com.events.modules.auth.exception.EmailAlreadyExistException;
-import com.events.modules.auth.exception.RegisterException;
 import com.events.modules.auth.exception.UserNotFoundException;
 import com.events.modules.auth.service.mail.IMailService;
 import com.events.modules.auth.service.jwt.IJwtService;
@@ -65,8 +66,11 @@ public class AuthService implements IAuthService {
             emailService.sendVerificationEmail(request.email(), token);
 
             return Constants.VERIFICATION_EMAIL_SENT_TO + request.email() + Constants.PLEASE_CHECK_YOUR_INBOX;
-        } catch (Exception e) {
-            throw new RegisterException(e.getMessage(), e.getCause());
+        } catch (EmailAlreadyExistException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new BusinessException(e.getMessage(), e.getCause());
         }
     }
 
@@ -85,14 +89,14 @@ public class AuthService implements IAuthService {
         }
 
         if(user.getVerificationToken() == null || !user.getVerificationToken().equals(token)) {
-            throw new IllegalArgumentException(Constants.INVALID_VERIFICATION_TOKEN);
+            throw new BadRequestException(Constants.INVALID_VERIFICATION_TOKEN);
         }
 
-        user.setVerified(true);
+        user.setVerified(Boolean.TRUE);
         user.setVerificationToken(null);
 
 
-        return Constants.USER_HAS_BEEN_SUCCESSFULLY_VERIFIED + user.getFullName() + Constants.EMPTY_STRING + user.getEmail();
+        return Constants.USER_HAS_BEEN_SUCCESSFULLY_VERIFIED + user.getFullName() + StringUtils.EMPTY + user.getEmail();
     }
 
     @Override
@@ -108,7 +112,7 @@ public class AuthService implements IAuthService {
 
         emailService.sendVerificationEmail(email, token);
 
-        return Constants.VERIFICATION_EMAIL_SENT_TO+ email + Constants.PLEASE_CHECK_YOUR_INBOX;
+        return Constants.VERIFICATION_EMAIL_SENT_TO + email + Constants.PLEASE_CHECK_YOUR_INBOX;
     }
 
     public AccessTokenDto login(LoginRequestDto request) {

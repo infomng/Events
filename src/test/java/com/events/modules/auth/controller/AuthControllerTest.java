@@ -206,7 +206,7 @@ class AuthControllerTest {
         return RegisterCommandDto.builder()
                 .fullName(Constants.JOHN_DOE)
                 .email(Constants.JOHN_DOE_EMAIL)
-                .password(Constants.TEST_PASSWORD)
+                .password(Constants.JOHN_DOE_PASSWORD)
                 .build();
     }
 }
