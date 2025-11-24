@@ -37,7 +37,7 @@ jobs:
 
       # 5. Archive le jar généré (optionnel mais utile)
       - name: Upload JAR artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: spring-boot-app
           path: target/*.jar
