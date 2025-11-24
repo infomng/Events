@@ -1,8 +1,9 @@
 package com.events.common.supabase.service;
 
-import com.events.common.supabase.config.SupabaseProperties;
+import com.events.common.config.properties.SupabaseProperties;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.text.Normalizer;
 import java.util.Objects;
 
 @Service
+@Transactional
 public class SupabaseStorageService {
 
     private final SupabaseProperties properties;
@@ -19,8 +21,8 @@ public class SupabaseStorageService {
         this.properties = properties;
 
         this.webClient = WebClient.builder()
-                .baseUrl(properties.getProjectUrl() + "/storage/v1/object/")
-                .defaultHeader("Authorization", "Bearer " + properties.getServiceRoleKey())
+                .baseUrl(properties.projectUrl() + "/storage/v1/object/")
+                .defaultHeader("Authorization", "Bearer " + properties.serviceRoleKey())
                 .build();
     }
 
@@ -36,13 +38,13 @@ public class SupabaseStorageService {
         String cleanedFileName = cleanFileName(file);
 
         webClient.put()
-                .uri(properties.getBucketName() + "/" + cleanedFileName)
+                .uri(properties.bucketName() + "/" + cleanedFileName)
                 .contentType(MediaType.parseMediaType(Objects.requireNonNull(file.getContentType())))
                 .bodyValue(file.getBytes())
                 .retrieve()
                 .toBodilessEntity()
                 .block();
 
-        return properties.getProjectUrl() + "/storage/v1/object/public/" + properties.getBucketName() + "/" + cleanedFileName;
+        return properties.projectUrl() + "/storage/v1/object/public/" + properties.bucketName() + "/" + cleanedFileName;
     }
 }

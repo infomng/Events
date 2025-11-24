@@ -22,8 +22,8 @@ script:pre-request {
    // TODO: runRequest is not yet available in the CLI (see: https://github.com/usebruno/bruno/issues/1350)
    /*
    const requestResponse = await bru.runRequest('Login.bru');
-   if(requestResponse.body.access_token) {
-     bru.setVar('access_token_set_by_collection_script', requestResponse.body.access_token);
+   if(requestResponse.body.value.access_token) {
+     bru.setVar('access_token_set_by_collection_script', requestResponse.body.value.access_token);
    }*/
 
    const url = `${bru.getEnvVar("host")}/api/v1/auth/login`;
@@ -34,8 +34,8 @@ script:pre-request {
      }
    });
 
-   if(requestResponse.data.access_token) {
-       bru.setVar('access_token_set_by_collection_script', requestResponse.data.access_token);
+   if(requestResponse.data.value.access_token) {
+       bru.setVar('access_token_set_by_collection_script', requestResponse.data.value.access_token);
    }
  }
 }
