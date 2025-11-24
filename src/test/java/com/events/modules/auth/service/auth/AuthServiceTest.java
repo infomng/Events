@@ -13,7 +13,7 @@ import com.events.modules.auth.service.mail.IMailService;
 import com.events.modules.user.dto.mapper.IUserMapper;
 import com.events.modules.user.entity.User;
 import com.events.modules.user.service.IUserService;
-import com.events.utils.TestUtils;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,7 +49,12 @@ class AuthServiceTest {
     @Test
     void register_shouldRegisterUserAndSendVerificationEmail() {
         // Given
-        RegisterCommandDto registerCommand = TestUtils.getRegisterCommandDto();
+        RegisterCommandDto registerCommand = RegisterCommandDto.builder()
+                .fullName(Constants.JOHN_DOE)
+                .email(Constants.JOHN_DOE_EMAIL)
+                .password(Constants.JOHN_DOE_PASSWORD)
+                .verificationToken(Constants.TOKEN)
+                .build();
 
         when(userService.existsByEmail(anyString())).thenReturn(Boolean.FALSE);
         when(passwordEncoder.encode(anyString())).thenReturn(Constants.JOHN_DOE_PASSWORD);
@@ -68,7 +73,12 @@ class AuthServiceTest {
     @Test
     void register_shouldThrowEmailAlreadyExistException() {
         // Given
-        RegisterCommandDto registerCommand = TestUtils.getRegisterCommandDto();
+        RegisterCommandDto registerCommand = RegisterCommandDto.builder()
+                .fullName(Constants.JOHN_DOE)
+                .email(Constants.JOHN_DOE_EMAIL)
+                .password(Constants.JOHN_DOE_PASSWORD)
+                .verificationToken(Constants.TOKEN)
+                .build();
 
         when(userService.existsByEmail(anyString())).thenReturn(Boolean.TRUE);
 
@@ -79,7 +89,13 @@ class AuthServiceTest {
     @Test
     void verifyEmail_shouldVerifyUser() {
         // Given
-        var user = TestUtils.getUser();
+        User user = User.builder()
+                .id(1L)
+                .email(Constants.JOHN_DOE_EMAIL)
+                .role(com.events.modules.user.enumeration.RoleEnum.USER)
+                .isVerified(false)
+                .verificationToken(Constants.TOKEN)
+                .build();
 
         when(jwtService.extractUsername(Constants.TOKEN)).thenReturn(user.getEmail());
         when(userService.findByEmail(user.getEmail())).thenReturn(user);
@@ -96,7 +112,13 @@ class AuthServiceTest {
     @Test
     void verifyEmail_shouldThrowBadRequestExceptionForAlreadyVerifiedUser() {
         // Given
-        User user = TestUtils.getUser();
+        User user = User.builder()
+                .id(1L)
+                .email(Constants.JOHN_DOE_EMAIL)
+                .role(com.events.modules.user.enumeration.RoleEnum.USER)
+                .isVerified(false)
+                .verificationToken(Constants.TOKEN)
+                .build();
         user.setVerified(Boolean.TRUE);
 
         when(jwtService.extractUsername(Constants.TOKEN)).thenReturn(user.getEmail());
@@ -109,7 +131,13 @@ class AuthServiceTest {
     @Test
     void verifyEmail_shouldThrowBadRequestExceptionForNullToken() {
         // Given
-        User user = TestUtils.getUser();
+        User user = User.builder()
+                .id(1L)
+                .email(Constants.JOHN_DOE_EMAIL)
+                .role(com.events.modules.user.enumeration.RoleEnum.USER)
+                .isVerified(false)
+                .verificationToken(Constants.TOKEN)
+                .build();
         user.setVerificationToken(null);
 
         when(jwtService.extractUsername(Constants.TOKEN)).thenReturn(user.getEmail());
@@ -122,7 +150,13 @@ class AuthServiceTest {
     @Test
     void verifyEmail_shouldThrowBadRequestExceptionForNonMatchingToken() {
         // Given
-        User user = TestUtils.getUser();
+        User user = User.builder()
+                .id(1L)
+                .email(Constants.JOHN_DOE_EMAIL)
+                .role(com.events.modules.user.enumeration.RoleEnum.USER)
+                .isVerified(false)
+                .verificationToken(Constants.TOKEN)
+                .build();
         user.setVerificationToken(StringUtils.EMPTY);
 
         when(jwtService.extractUsername(Constants.TOKEN)).thenReturn(user.getEmail());
@@ -135,7 +169,13 @@ class AuthServiceTest {
     @Test
     void resendVerificationEmail_shouldResendEmail() {
         // Given
-        User user = TestUtils.getUser();
+        User user = User.builder()
+                .id(1L)
+                .email(Constants.JOHN_DOE_EMAIL)
+                .role(com.events.modules.user.enumeration.RoleEnum.USER)
+                .isVerified(false)
+                .verificationToken(Constants.TOKEN)
+                .build();
         user.setVerificationToken(StringUtils.EMPTY);
         when(userService.findByEmail(user.getEmail())).thenReturn(user);
         when(jwtService.generateVerificationToken(user.getEmail())).thenReturn(Constants.TOKEN);
@@ -173,7 +213,13 @@ class AuthServiceTest {
     @Test
     void forgotPassword_shouldSendResetPasswordEmail() {
         // Given
-        var user = TestUtils.getUser();
+        User user = User.builder()
+                .id(1L)
+                .email(Constants.JOHN_DOE_EMAIL)
+                .role(com.events.modules.user.enumeration.RoleEnum.USER)
+                .isVerified(false)
+                .verificationToken(Constants.TOKEN)
+                .build();
         ForgotPasswordRequestDto forgotPasswordRequest = new ForgotPasswordRequestDto(user.getEmail());
         when(userService.findByEmail(forgotPasswordRequest.email())).thenReturn(user);
         when(jwtService.generateVerificationToken(user.getEmail())).thenReturn(Constants.TOKEN);
@@ -190,7 +236,13 @@ class AuthServiceTest {
     void resetPassword_shouldResetUserPassword() {
         // Given
         ResetPasswordRequestDto resetPasswordRequest = new ResetPasswordRequestDto(Constants.TOKEN, Constants.PASSWORD);
-        var user = TestUtils.getUser();
+        User user = User.builder()
+                .id(1L)
+                .email(Constants.JOHN_DOE_EMAIL)
+                .role(com.events.modules.user.enumeration.RoleEnum.USER)
+                .isVerified(false)
+                .verificationToken(Constants.TOKEN)
+                .build();
         user.setResetPasswordToken(Constants.TOKEN);
 
         when(jwtService.extractUsername(resetPasswordRequest.token())).thenReturn(user.getEmail());

@@ -27,16 +27,34 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (JwtException e) {
 
-            ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
-            problemDetail.setTitle(e.getClass().getSimpleName());
-            problemDetail.setDetail(Constants.INVALID_OR_EXPIRED_TOKEN);
-            problemDetail.setProperty(Constants.TIMESTAMP, Instant.now().toString());
-
-            var result = new ObjectMapper().writeValueAsString(Result.failure(problemDetail));
-
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write(result);
+            sendProblemDetailResponse(
+                    HttpStatus.UNAUTHORIZED,
+                    e.getClass().getSimpleName(),
+                    Constants.INVALID_OR_EXPIRED_TOKEN,
+                    response,
+                    HttpServletResponse.SC_UNAUTHORIZED);
         }
+        catch (TooManyRequestException e) {
+
+            sendProblemDetailResponse(
+                    HttpStatus.TOO_MANY_REQUESTS,
+                    e.getClass().getSimpleName(),
+                    Constants.TOO_MANY_REQUESTS,
+                    response,
+                    HttpStatus.TOO_MANY_REQUESTS.value());
+        }
+    }
+
+    private static void sendProblemDetailResponse(HttpStatus tooManyRequests, String exceptionClassName, String message, HttpServletResponse response, int statusCode) throws IOException {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(tooManyRequests);
+        problemDetail.setTitle(exceptionClassName);
+        problemDetail.setDetail(message);
+        problemDetail.setProperty(Constants.TIMESTAMP, Instant.now().toString());
+
+        var result = new ObjectMapper().writeValueAsString(Result.failure(problemDetail));
+
+        response.setStatus(statusCode);
+        response.setContentType("application/json");
+        response.getWriter().write(result);
     }
 }

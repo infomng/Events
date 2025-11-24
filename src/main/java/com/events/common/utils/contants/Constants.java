@@ -6,6 +6,9 @@ public final class Constants {
     public static final String ACCESS_TOKEN = "access_token";
     public static final String ROLES = "roles";
     public static final Long REFRESH_TOKEN_MIN_DURATION = 604800000L;
+    public static final String TOO_MANY_REQUESTS = "Too Many Requests";
+    public static final int RATE_LIMIT_REQUESTS = 10;
+    public static final int RATE_LIMIT_RESET_TIME = 1;
 
     private Constants() {}
 

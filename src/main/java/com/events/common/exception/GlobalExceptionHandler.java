@@ -21,7 +21,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
 
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler({RuntimeException.class, BadRequestException.class})
     public ResponseEntity<Result<ProblemDetail>> handleRuntime(RuntimeException ex) {
         ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         detail.setTitle(ex.getClass().getSimpleName());

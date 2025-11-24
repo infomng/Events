@@ -1,6 +1,7 @@
 package com.events.modules.auth.controller;
 
 import com.events.common.config.properties.JwtProperties;
+import com.events.modules.auth.config.ratelimit.annotation.RateLimit;
 import com.events.modules.auth.dto.AccessTokenDto;
 import com.events.modules.auth.dto.LoginRequestDto;
 import com.events.modules.auth.dto.RegisterCommandDto;
@@ -81,6 +82,7 @@ public class AuthController {
         return ResponseEntity.ok(Result.success(authService.resetPassword(request)));
     }
 
+    @RateLimit(capacity = 3)
     @GetMapping("/profile")
     public ResponseEntity<Result<GetUserDto>> profile() {
         return ResponseEntity.ok(Result.success(authService.getCurrentUserDto()));
