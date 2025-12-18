@@ -13,6 +13,7 @@ public class InterfaceNamingTest {
     void interfaces_should_start_with_I(JavaClasses classes) {
         classes()
                 .that().areInterfaces()
+                .and().areNotAnnotations()
                 .should().haveSimpleNameStartingWith("I")
                 .check(classes);
     }

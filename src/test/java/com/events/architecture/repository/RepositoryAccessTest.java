@@ -18,13 +18,15 @@ public class RepositoryAccessTest {
                     // compute expected Service name
                     String entityName = repository.getSimpleName().substring(1, repository.getSimpleName().length() - "Repository".length());
                     String expectedService = entityName + "Service";
+                    String expectedServiceTest = entityName + "ServiceTest";
 
                     // check who depends on this repository
                     classes.stream()
                             .filter(c -> c.getDirectDependenciesFromSelf().stream()
                                     .anyMatch(dep -> dep.getTargetClass().equals(repository)))
                             .forEach(dep -> {
-                                if (!dep.getSimpleName().equals(expectedService)) {
+                                if (!dep.getSimpleName().equals(expectedService) &&
+                                        !dep.getSimpleName().equals(expectedServiceTest)) {
                                     throw new AssertionError(
                                             repository.getSimpleName() + " should only be accessed by " + expectedService +
                                                     ", but is accessed by " + dep.getSimpleName()

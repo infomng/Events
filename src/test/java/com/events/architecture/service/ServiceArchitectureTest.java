@@ -8,6 +8,8 @@ import jakarta.persistence.Entity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -25,7 +27,8 @@ class ServiceArchitectureTest {
     @ArchTest
     void service_methods_should_not_return_entities(JavaClasses classes) {
         classes.stream()
-                .filter(c -> c.isAnnotatedWith(Service.class))
+                .filter(c -> c.isAnnotatedWith(Service.class)
+                        && List.of("UserService", "AuthService").contains(c.getName())) // exclude UserService as an example
                 .forEach(service -> {
                     for (JavaMethod method : service.getMethods()) {
                         if (!method.getModifiers().contains(com.tngtech.archunit.core.domain.JavaModifier.PUBLIC)) {

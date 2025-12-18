@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/events")
@@ -21,7 +22,7 @@ public class EventController {
     private final IEventService service;
 
     @PostMapping()
-    public ResponseEntity<Result<Long>> create(@Valid @RequestBody CreateEventCommandDto command) {
+    public ResponseEntity<Result<UUID>> create(@Valid @RequestBody CreateEventCommandDto command) {
         return ResponseEntity.ok(Result.success(service.createEvent(command)));
     }
 

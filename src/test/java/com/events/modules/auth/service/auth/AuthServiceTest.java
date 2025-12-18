@@ -22,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -90,7 +92,7 @@ class AuthServiceTest {
     void verifyEmail_shouldVerifyUser() {
         // Given
         User user = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .email(Constants.JOHN_DOE_EMAIL)
                 .role(com.events.modules.user.enumeration.RoleEnum.USER)
                 .isVerified(false)
@@ -113,7 +115,7 @@ class AuthServiceTest {
     void verifyEmail_shouldThrowBadRequestExceptionForAlreadyVerifiedUser() {
         // Given
         User user = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .email(Constants.JOHN_DOE_EMAIL)
                 .role(com.events.modules.user.enumeration.RoleEnum.USER)
                 .isVerified(false)
@@ -132,7 +134,7 @@ class AuthServiceTest {
     void verifyEmail_shouldThrowBadRequestExceptionForNullToken() {
         // Given
         User user = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .email(Constants.JOHN_DOE_EMAIL)
                 .role(com.events.modules.user.enumeration.RoleEnum.USER)
                 .isVerified(false)
@@ -151,7 +153,7 @@ class AuthServiceTest {
     void verifyEmail_shouldThrowBadRequestExceptionForNonMatchingToken() {
         // Given
         User user = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .email(Constants.JOHN_DOE_EMAIL)
                 .role(com.events.modules.user.enumeration.RoleEnum.USER)
                 .isVerified(false)
@@ -170,7 +172,7 @@ class AuthServiceTest {
     void resendVerificationEmail_shouldResendEmail() {
         // Given
         User user = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .email(Constants.JOHN_DOE_EMAIL)
                 .role(com.events.modules.user.enumeration.RoleEnum.USER)
                 .isVerified(false)
@@ -214,7 +216,7 @@ class AuthServiceTest {
     void forgotPassword_shouldSendResetPasswordEmail() {
         // Given
         User user = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .email(Constants.JOHN_DOE_EMAIL)
                 .role(com.events.modules.user.enumeration.RoleEnum.USER)
                 .isVerified(false)
@@ -237,7 +239,7 @@ class AuthServiceTest {
         // Given
         ResetPasswordRequestDto resetPasswordRequest = new ResetPasswordRequestDto(Constants.TOKEN, Constants.PASSWORD);
         User user = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .email(Constants.JOHN_DOE_EMAIL)
                 .role(com.events.modules.user.enumeration.RoleEnum.USER)
                 .isVerified(false)

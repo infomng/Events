@@ -9,6 +9,12 @@ public final class Constants {
     public static final String TOO_MANY_REQUESTS = "Too Many Requests";
     public static final int RATE_LIMIT_REQUESTS = 10;
     public static final int RATE_LIMIT_RESET_TIME = 1;
+    public static final String INVALID_DATE =  "Start date cannot be after end date";
+    public static final String INVALID_START_DATE =  "Ticket sales start date cannot be after end date";
+    public static final String PRICE_MUST_BE_POSITIVE = "Ticket price must be greater than 0 for paid events";
+    public static final String PRICE_MUST_BE_NULL_FOR_FREE_EVENT = "Ticket price must be null for free events";
+    public static final String HTTP_ONLY = "HttpOnly";
+    public static final String HEADER = "header";
 
     private Constants() {}
 
