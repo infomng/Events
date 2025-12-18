@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -30,24 +31,7 @@ public class EventService implements IEventService {
     private final IEventMapper eventMapper;
 
     @Override
-    public Long createEvent(CreateEventCommandDto command) {
-        if (command.startDate().isAfter(command.endDate())) {
-            throw new BadRequestException("Start date cannot be after end date");
-        }
-
-        if (command.ticketSalesStartDate() != null
-                && command.ticketSalesEndDate() != null
-                && command.ticketSalesStartDate().isAfter(command.ticketSalesEndDate())) {
-            throw new BadRequestException("Ticket sales start date cannot be after end date");
-        }
-
-        if(!command.isFree() && (command.ticketPrice() == null || command.ticketPrice() <= 0 )) {
-            throw new BadRequestException("Ticket price must be greater than 0 for paid events");
-        }
-
-        if (command.isFree() && (command.ticketPrice() != null)) {
-            throw new BadRequestException("Ticket price must be null for free events");
-        }
+    public UUID createEvent(CreateEventCommandDto command) {
 
         User currentUser = authService.getCurrentUser();
 

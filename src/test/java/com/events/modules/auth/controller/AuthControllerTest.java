@@ -24,7 +24,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationConverter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationConverter;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
@@ -41,7 +40,6 @@ class AuthControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
 
     @MockBean
     private IAuthService authService;
@@ -61,7 +59,8 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final AuthenticationConverter authenticationConverter = new BasicAuthenticationConverter();
+    @MockBean
+    private AuthenticationConverter authenticationConverter;
 
     @Value("${app.api-version}")
     private String apiVersion;
@@ -95,17 +94,17 @@ class AuthControllerTest {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(Constants.JOHN_DOE, Constants.PASSWORD);
 
-        when(authenticationConverter.convert(nullable(HttpServletRequest.class)))
+        when(authenticationConverter.convert(any(HttpServletRequest.class)))
                 .thenReturn(authenticationToken);
 
         AccessTokenDto accessTokenDto = new AccessTokenDto(Constants.TOKEN);
         when(authService.login(any(LoginRequestDto.class))).thenReturn(accessTokenDto);
 
         RefreshTokenResponseDto refreshToken = new RefreshTokenResponseDto(Constants.TOKEN);
-        when(refreshTokenService.createRefreshToken(Constants.TOKEN)).thenReturn(refreshToken);
+        when(refreshTokenService.createRefreshToken(anyString())).thenReturn(refreshToken);
 
         JwtProperties.RefreshToken refreshProps =
-                new JwtProperties.RefreshToken(Constants.TOKEN, 604800000L);
+                new JwtProperties.RefreshToken(Constants.TOKEN, Constants.REFRESH_TOKEN_MIN_DURATION);
 
         when(jwtProperties.refreshToken()).thenReturn(refreshProps);
 
@@ -114,17 +113,17 @@ class AuthControllerTest {
         mockMvc.perform(
                 post(authApiUrl + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("dummy", "header")
+                        .header(Constants.HEADER, Constants.HEADER)
                 )
                 .andExpect(status().isOk())
 
                 // Cookie bien généré
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString(Constants.REFRESH_TOKEN)))
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString(Constants.HTTP_ONLY)))
 
                 // Body JSON du Result<AccessToken>
-                .andExpect(jsonPath("$.data.token").value("jwt123"))
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(jsonPath("$.value.access_token").value(Constants.TOKEN))
+                .andExpect(jsonPath("$.isSuccess").value(true));
     }
 
     @Test

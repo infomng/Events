@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "USERS")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -43,10 +43,10 @@ public class User extends AuditableEntity {
     @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Event> organizedEvents = new HashSet<>();
 
-    @ManyToMany(mappedBy = "attendees", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "attendees",  fetch = FetchType.LAZY)
     private Set<Event> eventsAttending;
 
-    @ManyToMany(mappedBy = "staff", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "staff", fetch = FetchType.LAZY)
     private Set<Event> eventsStaffing;
 
     @Enumerated(EnumType.STRING)

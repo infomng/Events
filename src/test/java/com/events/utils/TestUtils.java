@@ -8,6 +8,7 @@ import com.events.modules.user.entity.User;
 import com.events.modules.user.enumeration.RoleEnum;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public class TestUtils {
     private TestUtils() {}
@@ -23,7 +24,7 @@ public class TestUtils {
 
     public static User getUser() {
         return User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .email(Constants.JOHN_DOE_EMAIL)
                 .role(RoleEnum.USER)
                 .isVerified(false)
@@ -38,6 +39,16 @@ public class TestUtils {
                 .expirationDate(Instant.now().plusMillis(Constants.REFRESH_TOKEN_MIN_DURATION))
                 .build();
     }
+
+    public static RefreshToken getExpiredRefreshToken(User user) {
+        return RefreshToken.builder()
+                .user(user)
+                .token(Constants.TOKEN)
+                .expirationDate(Instant.now().minusMillis(Constants.REFRESH_TOKEN_MIN_DURATION))
+                .build();
+    }
+
+
 
     public static JwtProperties.RefreshToken getRefreshTokenProps() {
         return new JwtProperties.RefreshToken(Constants.TOKEN, Constants.REFRESH_TOKEN_MIN_DURATION);
