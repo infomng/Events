@@ -20,7 +20,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.authentication.AuthenticationConverter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationConverter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -33,7 +32,7 @@ public class AuthController {
     private final IAuthService authService;
     private final IRefreshTokenService refreshTokenService;
     private final JwtProperties jwtProperties;
-    private final AuthenticationConverter authenticationConverter = new BasicAuthenticationConverter();
+    private final AuthenticationConverter authenticationConverter;
 
     @PostMapping("/register")
     public ResponseEntity<Result<String>> register(@RequestBody @Valid RegisterCommandDto command) {
