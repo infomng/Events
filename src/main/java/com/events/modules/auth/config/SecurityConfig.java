@@ -12,7 +12,6 @@ import com.events.modules.auth.service.jwt.impl.JwtService;
 import com.events.modules.auth.service.oauth.CustomOAuth2UserService;
 import com.events.modules.auth.utils.SecurityUtils;
 import com.events.modules.user.entity.User;
-import com.events.modules.user.entity.role.Role;
 import com.events.modules.user.enumeration.RoleEnum;
 import com.events.modules.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -85,7 +84,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(WHITE_LIST_URL).permitAll()
-                        .requestMatchers(apiVersion + "/products/**").hasAnyRole(Role.ADMIN.name(), Role.USER.name())
+                        .requestMatchers(apiVersion + "/products/**").hasAnyRole(RoleEnum.ADMIN.name(), RoleEnum.USER.name())
                         .requestMatchers(apiVersion + "/auth/profile").authenticated()
                         .anyRequest()
                         .authenticated()
