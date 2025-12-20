@@ -67,7 +67,7 @@ jobs:
 
       # 8. Uploader le rapport (téléchargeable depuis GitHub)
       - name: Upload test report
-        uses: actions/upload-artifact@v5.0.0
+        uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: test-report
@@ -75,7 +75,7 @@ jobs:
 
       # 9. Uploader le JAR (utile même en échec partiel)
       - name: Upload generated JAR
-        uses: actions/upload-artifact@v5.0.0
+        uses: actions/upload-artifact@v6
         with:
           name: app-jar
           path: target/*.jar
