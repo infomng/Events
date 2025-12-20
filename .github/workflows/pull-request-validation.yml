@@ -1,4 +1,4 @@
-name: Spring Boot Clean CI
+name: Pull Request Validation
 
 on:
   push:

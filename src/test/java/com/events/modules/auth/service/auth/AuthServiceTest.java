@@ -69,7 +69,7 @@ class AuthServiceTest {
         verify(userService, times(1)).createUser(any(RegisterCommandDto.class));
         verify(emailService, times(1))
                 .sendVerificationEmail(Constants.JOHN_DOE_EMAIL, Constants.TOKEN);
-        assertFalse(result.contains(Constants.VERIFICATION_EMAIL_SENT_TO + Constants.JOHN_DOE_EMAIL + Constants.PLEASE_CHECK_YOUR_INBOX));
+        assertTrue(result.contains(Constants.VERIFICATION_EMAIL_SENT_TO + Constants.JOHN_DOE_EMAIL + Constants.PLEASE_CHECK_YOUR_INBOX));
     }
 
     @Test
